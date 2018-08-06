@@ -18,6 +18,9 @@ class InstagramLoginViewController: UIViewController {
 
     // MARK: - Properties
 
+    var leftButton: UIBarButtonItem?
+    var rightButton: UIBarButtonItem?
+    
     private var authURL: URL
     private var success: SuccessHandler?
     private var failure: FailureHandler?
@@ -50,6 +53,7 @@ class InstagramLoginViewController: UIViewController {
 
         // Initializes progress view
         setupProgressView()
+        setupNavigationItem()
 
         // Initializes web view
         let webView = setupWebView()
@@ -80,6 +84,14 @@ class InstagramLoginViewController: UIViewController {
         let rightConstraint = navBar.trailingAnchor.constraint(equalTo: progressView.trailingAnchor)
 
         NSLayoutConstraint.activate([bottomConstraint, leftConstraint, rightConstraint])
+    }
+    
+    private func setupNavigationItem() {
+        navigationItem.leftBarButtonItem = leftButton
+        navigationItem.leftBarButtonItem?.imageInsets = UIEdgeInsetsMake(0, 2, 0, -2)
+        
+        navigationItem.rightBarButtonItem = rightButton
+        navigationItem.rightBarButtonItem?.imageInsets = UIEdgeInsetsMake(0, 2, 0, -2)
     }
 
     private func setupWebView() -> WKWebView {
