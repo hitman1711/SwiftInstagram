@@ -51,12 +51,12 @@ class InstagramLoginViewController: UIViewController {
             navigationItem.largeTitleDisplayMode = .never
         }
 
+        // Initializes web view
+        let webView = setupWebView()
+        
         // Initializes progress view
         setupProgressView()
         setupNavigationItem()
-
-        // Initializes web view
-        let webView = setupWebView()
 
         // Starts authorization
         webView.load(URLRequest(url: authURL, cachePolicy: .reloadIgnoringLocalAndRemoteCacheData))
@@ -70,28 +70,23 @@ class InstagramLoginViewController: UIViewController {
     // MARK: -
 
     private func setupProgressView() {
-        let navBar = navigationController!.navigationBar
-
         progressView = UIProgressView(progressViewStyle: .bar)
         progressView.progress = 0.0
         progressView.tintColor = UIColor(red: 0.88, green: 0.19, blue: 0.42, alpha: 1.0)
         progressView.translatesAutoresizingMaskIntoConstraints = false
 
-        navBar.addSubview(progressView)
+        view.addSubview(progressView)
 
-        let bottomConstraint = navBar.bottomAnchor.constraint(equalTo: progressView.bottomAnchor, constant: 1)
-        let leftConstraint = navBar.leadingAnchor.constraint(equalTo: progressView.leadingAnchor)
-        let rightConstraint = navBar.trailingAnchor.constraint(equalTo: progressView.trailingAnchor)
+        let bottomConstraint = view.topAnchor.constraint(equalTo: progressView.topAnchor, constant: 1)
+        let leftConstraint = view.leadingAnchor.constraint(equalTo: progressView.leadingAnchor)
+        let rightConstraint = view.trailingAnchor.constraint(equalTo: progressView.trailingAnchor)
 
         NSLayoutConstraint.activate([bottomConstraint, leftConstraint, rightConstraint])
     }
     
     private func setupNavigationItem() {
         navigationItem.leftBarButtonItem = leftButton
-        navigationItem.leftBarButtonItem?.imageInsets = UIEdgeInsetsMake(0, 2, 0, -2)
-        
         navigationItem.rightBarButtonItem = rightButton
-        navigationItem.rightBarButtonItem?.imageInsets = UIEdgeInsetsMake(0, 2, 0, -2)
     }
 
     private func setupWebView() -> WKWebView {
