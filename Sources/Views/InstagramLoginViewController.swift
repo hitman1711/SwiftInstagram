@@ -20,6 +20,7 @@ class InstagramLoginViewController: UIViewController {
 
     var leftButton: UIBarButtonItem?
     var rightButton: UIBarButtonItem?
+    var progressMarginTop: CGFloat = 0
     
     private var authURL: URL
     private var success: SuccessHandler?
@@ -77,7 +78,7 @@ class InstagramLoginViewController: UIViewController {
 
         view.addSubview(progressView)
 
-        let bottomConstraint = view.topAnchor.constraint(equalTo: progressView.topAnchor, constant: 1)
+        let bottomConstraint = view.topAnchor.constraint(equalTo: progressView.topAnchor, constant: progressMarginTop)
         let leftConstraint = view.leadingAnchor.constraint(equalTo: progressView.leadingAnchor)
         let rightConstraint = view.trailingAnchor.constraint(equalTo: progressView.trailingAnchor)
 
