@@ -94,7 +94,7 @@ class InstagramLoginViewController: UIViewController {
         let webConfiguration = WKWebViewConfiguration()
         webConfiguration.websiteDataStore = .nonPersistent()
 
-        let frame = CGRect(x: -progressMarginTop, y: 0, width: view.bounds.size.width, height: view.bounds.size.height)
+        let frame = CGRect(x: 0, y: -progressMarginTop, width: view.bounds.size.width, height: view.bounds.size.height)
         let webView = WKWebView(frame: frame, configuration: webConfiguration)
         webView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         webView.navigationDelegate = self
