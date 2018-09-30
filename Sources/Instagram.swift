@@ -8,6 +8,18 @@
 
 import UIKit
 
+public func Log(_ message: String, file: String = #file, function: String = #function, line: Int = #line)
+{
+	let uInfo = [
+		"text" : message,
+		"file" : file,
+		"func" : function,
+		"line" : line
+	] as [String : Any]
+	NotificationCenter.default.post(name: NSNotification.Name("Engine.Log"), object: nil, userInfo: uInfo)
+//	ServiceProvider.shared.loggerService.Log(message, level: level, file: file, function: function, line: line)
+}
+
 /// A set of helper functions to make the Instagram API easier to use.
 public class Instagram {
 
@@ -135,42 +147,87 @@ public class Instagram {
                                method: HTTPMethod = .get,
                                parameters: Parameters = [:],
                                success: ((_ data: T?) -> Void)?,
-                               failure: FailureHandler?) {
-
-        let urlRequest = buildURLRequest(endpoint, method: method, parameters: parameters)
-
-        urlSession.dataTask(with: urlRequest) { (data, _, error) in
-            if let data = data {
-                DispatchQueue.global(qos: .utility).async {
-                    do {
-                        let jsonDecoder = JSONDecoder()
-                        jsonDecoder.keyDecodingStrategy = .convertFromSnakeCase
-                        let object = try jsonDecoder.decode(InstagramResponse<T>.self, from: data)
-
-                        if let data = object.data {
-                            DispatchQueue.main.async {
-                                success?(data)
-                            }
-                        } else if let message = object.meta.errorMessage {
-                            DispatchQueue.main.async {
-                                failure?(InstagramError.invalidRequest(message: message))
-                            }
-                        } else {
-                            DispatchQueue.main.async {
-                                success?(nil)
-                            }
-                        }
-                    } catch let error {
-                        DispatchQueue.main.async {
-                            failure?(InstagramError.decoding(message: error.localizedDescription))
-                        }
-                    }
-                }
-            } else if let error = error {
-                failure?(error)
-            }
-        }.resume()
+                               failure: FailureHandler?)
+	{
+		
+		rawRequest(endpoint, method: method, parameters: parameters, success: { (data: InstagramResponse<T>?) in
+			guard let object = data else { return }
+			if let data = object.data {
+				DispatchQueue.main.async {
+					success?(data)
+				}
+			} else if let message = object.meta.errorMessage {
+				DispatchQueue.main.async {
+					failure?(InstagramError.invalidRequest(message: message))
+				}
+			} else {
+				DispatchQueue.main.async {
+					success?(nil)
+				}
+			}
+		}, failure: failure)
     }
+	
+	func rawRequest<T: Decodable>(_ endpoint: String,
+					method: HTTPMethod = .get,
+					parameters: Parameters = [:],
+					success: ((_ data: InstagramResponse<T>?) -> Void)?,
+					failure: FailureHandler?)
+	{
+		let urlRequest = buildURLRequest(endpoint, method: method, parameters: parameters)
+		
+		Log("INSTA Request: URL: \(urlRequest.url);\n Params: \(parameters)")
+		
+		urlSession.dataTask(with: urlRequest) { (data, _, error) in
+			if let data = data {
+				DispatchQueue.global(qos: .utility).async {
+					do {
+						let jsonDecoder = JSONDecoder()
+						jsonDecoder.keyDecodingStrategy = .convertFromSnakeCase
+						
+						let object = try jsonDecoder.decode(InstagramResponse<T>.self, from: data)
+						DispatchQueue.main.async {
+							success?(object)
+						}
+					} catch let error {
+						DispatchQueue.main.async {
+							failure?(InstagramError.decoding(message: error.localizedDescription))
+						}
+					}
+				}
+			} else if let error = error {
+				failure?(error)
+			}
+		}.resume()
+	}
+	
+	func rawestRequest(_ endpoint: String,
+							  method: HTTPMethod = .get,
+							  parameters: Parameters = [:],
+							  success: ((_ data: [String: Any]?) -> Void)?,
+							  failure: FailureHandler?)
+	{
+		let urlRequest = buildURLRequest(endpoint, method: method, parameters: parameters)
+		
+		urlSession.dataTask(with: urlRequest) { (data, _, error) in
+			if let data = data {
+				DispatchQueue.global(qos: .utility).async {
+					do {
+						let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String:AnyObject]
+						DispatchQueue.main.async {
+							success?(json!)
+						}
+					} catch let error {
+						DispatchQueue.main.async {
+							failure?(InstagramError.decoding(message: error.localizedDescription))
+						}
+					}
+				}
+			} else if let error = error {
+				failure?(error)
+			}
+			}.resume()
+	}
 
     private func buildURLRequest(_ endpoint: String, method: HTTPMethod, parameters: Parameters) -> URLRequest {
         let url = URL(string: API.baseURL + endpoint)!.appendingQueryParameters(["access_token": retrieveAccessToken() ?? ""])
