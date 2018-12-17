@@ -25,6 +25,8 @@ class InstagramLoginViewController: UIViewController {
     private var authURL: URL
     private var success: SuccessHandler?
     private var failure: FailureHandler?
+	
+	private var webView: WKWebView!
 
     private var progressView: UIProgressView!
     private var webViewObservation: NSKeyValueObservation!
@@ -60,7 +62,7 @@ class InstagramLoginViewController: UIViewController {
         setupNavigationItem()
 
         // Starts authorization
-        webView.load(URLRequest(url: authURL, cachePolicy: .reloadIgnoringLocalAndRemoteCacheData))
+        self.webView.load(URLRequest(url: authURL, cachePolicy: .reloadIgnoringLocalAndRemoteCacheData))
     }
 
     deinit {
@@ -92,7 +94,7 @@ class InstagramLoginViewController: UIViewController {
 
     private func setupWebView() -> WKWebView {
         let webConfiguration = WKWebViewConfiguration()
-        webConfiguration.websiteDataStore = .nonPersistent()
+        webConfiguration.websiteDataStore = .default()//.nonPersistent()
 
         let frame = CGRect(x: 0, y: -progressMarginTop, width: view.bounds.size.width, height: view.bounds.size.height + progressMarginTop)
         let webView = WKWebView(frame: frame, configuration: webConfiguration)
@@ -123,6 +125,8 @@ class InstagramLoginViewController: UIViewController {
 
 // MARK: - WKNavigationDelegate
 
+private let redirectURL = "https://www.instagram.com/."
+
 extension InstagramLoginViewController: WKNavigationDelegate {
 
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
@@ -132,19 +136,34 @@ extension InstagramLoginViewController: WKNavigationDelegate {
     func webView(_ webView: WKWebView,
                  decidePolicyFor navigationAction: WKNavigationAction,
                  decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
-
+		var logStr = ""
         let urlString = navigationAction.request.url!.absoluteString
+		
+		logStr += "URL: \(urlString).\n"
+	
+		let tokenRange = urlString.range(of: "#access_token=")
+		if tokenRange == nil && !urlString.contains(redirectURL) {
+			decisionHandler(.allow)
+			logStr += "Allow. -> Return"
+			Log(logStr)
+			return
+		} else if urlString.contains(redirectURL) && abs(urlString.count - redirectURL.count) < 3 {
+			decisionHandler(.cancel)
+			logStr += "Cancel. -> Redirect Back!"
+			Log(logStr)
+			self.webView.load(URLRequest(url: authURL, cachePolicy: .reloadIgnoringLocalAndRemoteCacheData))
+			return
+		}
+		decisionHandler(.allow)
 
-        guard let range = urlString.range(of: "#access_token=") else {
-            decisionHandler(.allow)
-            return
-        }
-
-        decisionHandler(.cancel)
-
-        DispatchQueue.main.async {
-            self.success?(String(urlString[range.upperBound...]))
-        }
+		if let tokenR = tokenRange {
+			logStr += "Cancel. -> SUCCESS!!!"
+			Log(logStr)
+			DispatchQueue.main.async {
+				self.success?(String(urlString[tokenR.upperBound...]))
+			}
+		}
+		
     }
 
     func webView(_ webView: WKWebView,

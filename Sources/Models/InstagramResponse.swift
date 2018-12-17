@@ -6,25 +6,25 @@
 //  Copyright © 2017 Ander Goig. All rights reserved.
 //
 
-struct InstagramResponse<T: Decodable>: Decodable {
+public struct InstagramResponse<T: Decodable>: Decodable {
 
     // MARK: - Properties
 
-    let data: T?
-    let meta: Meta
-    let pagination: Pagination?
+    public let data: T?
+    public let meta: Meta
+	public let pagination: Pagination?
 
     // MARK: - Types
 
-    struct Meta: Decodable {
-        let code: Int
-        let errorType: String?
-        let errorMessage: String?
+    public struct Meta: Decodable {
+		public let code: Int
+        public let errorType: String?
+        public let errorMessage: String?
     }
 
-    struct Pagination: Decodable {
-        let nextUrl: String?
-        let nextMaxId: String?
+    public struct Pagination: Decodable {
+        public let nextUrl: String?
+        public let nextMaxId: String?
     }
 }
 

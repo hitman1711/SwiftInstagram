@@ -46,6 +46,54 @@ extension Instagram {
 
         request("/users/\(userId)/media/recent", parameters: parameters, success: { data in success?(data!) }, failure: failure)
     }
+	
+	public func rawFeed(fromUser userId: String,
+							   maxId: String? = nil,
+							   minId: String? = nil,
+							   count: Int? = nil,
+							   success: SuccessHandler<InstagramResponse<[InstagramMedia]>>?,
+							   failure: FailureHandler?) {
+		
+		var parameters = Parameters()
+		
+		parameters["max_id"] ??= maxId
+		parameters["min_id"] ??= minId
+		parameters["count"] ??= count
+		
+		rawRequest("/users/\(userId)/feed", parameters: parameters, success: { data in success?(data!) }, failure: failure)
+	}
+	
+	public func rawRecentMedia(fromUser userId: String,
+							maxId: String? = nil,
+							minId: String? = nil,
+							count: Int? = nil,
+							success: SuccessHandler<InstagramResponse<[InstagramMedia]>>?,
+							failure: FailureHandler?) {
+		
+		var parameters = Parameters()
+		
+		parameters["max_id"] ??= maxId
+		parameters["min_id"] ??= minId
+		parameters["count"] ??= count
+		
+		rawRequest("/users/\(userId)/media/recent", parameters: parameters, success: { data in success?(data!) }, failure: failure)
+	}
+	
+	public func rawestRecentMedia(fromUser userId: String,
+							   maxId: String? = nil,
+							   minId: String? = nil,
+							   count: Int? = nil,
+							   success: SuccessHandler<[String: Any]>?,
+							   failure: FailureHandler?) {
+		
+		var parameters = Parameters()
+		
+		parameters["max_id"] ??= maxId
+		parameters["min_id"] ??= minId
+		parameters["count"] ??= count
+		
+		rawestRequest("/users/\(userId)/media/recent", parameters: parameters, success: { data in success?(data!) }, failure: failure)
+	}
 
     /// Get the list of recent media liked by the currently authenticated user.
     ///
