@@ -94,7 +94,7 @@ class InstagramLoginViewController: UIViewController {
 
     private func setupWebView() -> WKWebView {
         let webConfiguration = WKWebViewConfiguration()
-        webConfiguration.websiteDataStore = .default()//.nonPersistent()
+        webConfiguration.websiteDataStore = .nonPersistent()
 
         let frame = CGRect(x: 0, y: -progressMarginTop, width: view.bounds.size.width, height: view.bounds.size.height + progressMarginTop)
         let webView = WKWebView(frame: frame, configuration: webConfiguration)
@@ -125,7 +125,7 @@ class InstagramLoginViewController: UIViewController {
 
 // MARK: - WKNavigationDelegate
 
-private let redirectURL = "https://www.instagram.com/."
+private let redirectURL = "https://www.instagram.com"
 
 extension InstagramLoginViewController: WKNavigationDelegate {
 
