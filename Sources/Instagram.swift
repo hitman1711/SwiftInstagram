@@ -78,6 +78,9 @@ public class Instagram {
     /// - parameter success: The callback called after a correct login.
     /// - parameter failure: The callback called after an incorrect login.
     public func login(from controller: UINavigationController,
+                      leftButton: UIBarButtonItem? = nil,
+                      rightButton: UIBarButtonItem? = nil,
+                      progressMarginTop: CGFloat? = 0,
                       withScopes scopes: [InstagramScope] = [.basic],
                       success: EmptySuccessHandler?,
                       failure: FailureHandler?) {
@@ -95,6 +98,11 @@ public class Instagram {
             controller.popViewController(animated: true)
             success?()
         }, failure: failure)
+        vc.leftButton = leftButton
+        vc.rightButton = rightButton
+        if let marginTop = progressMarginTop {
+            vc.progressMarginTop = marginTop
+        }
 
         controller.show(vc, sender: nil)
     }

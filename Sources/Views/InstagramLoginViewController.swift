@@ -18,6 +18,10 @@ class InstagramLoginViewController: UIViewController {
 
     // MARK: - Properties
 
+    var leftButton: UIBarButtonItem?
+    var rightButton: UIBarButtonItem?
+    var progressMarginTop: CGFloat = 0
+    
     private var authURL: URL
     private var success: SuccessHandler?
     private var failure: FailureHandler?
@@ -50,11 +54,12 @@ class InstagramLoginViewController: UIViewController {
             navigationItem.largeTitleDisplayMode = .never
         }
 
+        // Initializes web view
+        webView = setupWebView()
+        
         // Initializes progress view
         setupProgressView()
-
-        // Initializes web view
-        self.webView = setupWebView()
+        setupNavigationItem()
 
         // Starts authorization
         self.webView.load(URLRequest(url: authURL, cachePolicy: .reloadIgnoringLocalAndRemoteCacheData))
@@ -68,27 +73,31 @@ class InstagramLoginViewController: UIViewController {
     // MARK: -
 
     private func setupProgressView() {
-        let navBar = navigationController!.navigationBar
-
         progressView = UIProgressView(progressViewStyle: .bar)
         progressView.progress = 0.0
         progressView.tintColor = UIColor(red: 0.88, green: 0.19, blue: 0.42, alpha: 1.0)
         progressView.translatesAutoresizingMaskIntoConstraints = false
 
-        navBar.addSubview(progressView)
+        view.addSubview(progressView)
 
-        let bottomConstraint = navBar.bottomAnchor.constraint(equalTo: progressView.bottomAnchor, constant: 1)
-        let leftConstraint = navBar.leadingAnchor.constraint(equalTo: progressView.leadingAnchor)
-        let rightConstraint = navBar.trailingAnchor.constraint(equalTo: progressView.trailingAnchor)
+        let bottomConstraint = view.topAnchor.constraint(equalTo: progressView.topAnchor, constant: progressMarginTop)
+        let leftConstraint = view.leadingAnchor.constraint(equalTo: progressView.leadingAnchor)
+        let rightConstraint = view.trailingAnchor.constraint(equalTo: progressView.trailingAnchor)
 
         NSLayoutConstraint.activate([bottomConstraint, leftConstraint, rightConstraint])
+    }
+    
+    private func setupNavigationItem() {
+        navigationItem.leftBarButtonItem = leftButton
+        navigationItem.rightBarButtonItem = rightButton
     }
 
     private func setupWebView() -> WKWebView {
         let webConfiguration = WKWebViewConfiguration()
-        webConfiguration.websiteDataStore = .default()//.nonPersistent()
+        webConfiguration.websiteDataStore = .nonPersistent()
 
-        let webView = WKWebView(frame: view.frame, configuration: webConfiguration)
+        let frame = CGRect(x: 0, y: -progressMarginTop, width: view.bounds.size.width, height: view.bounds.size.height + progressMarginTop)
+        let webView = WKWebView(frame: frame, configuration: webConfiguration)
         webView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         webView.navigationDelegate = self
 
@@ -116,7 +125,7 @@ class InstagramLoginViewController: UIViewController {
 
 // MARK: - WKNavigationDelegate
 
-private let redirectURL = "https://www.instagram.com/."
+private let redirectURL = "https://www.instagram.com"
 
 extension InstagramLoginViewController: WKNavigationDelegate {
 
